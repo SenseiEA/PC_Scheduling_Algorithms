@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <title>Process Scheduler</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+      }
+    
+      th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+    
+      th {
+        background-color: #f2f2f2;
+      }
+    
+      .gantt-chart {
+        display: flex;
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+    
+      .bar {
+        height: 20px;
+        margin-right: 4px;
+        background-color: #4caf50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+  
+      .nav-item{
+          transition: 0.3s;
+          background-color: black;
+          font-weight: bold;
+          text-decoration: none;
+      }
+      .nav-item:hover{
+          background-color: gray;
+      }
+  
+          .container{
+              margin-top: 50px;
+              background: rgb(2,0,36);
+              transition: 0.3s;
+              color: whitesmoke;
+              text-decoration: none;
+              font-weight: bold;
+              padding: 50px;
+              border-radius: 20px;
+              filter: none !important;
+          }
+  
+  
+          #outputTable{
+              color: black;
+          }
+          
+          #outputBody{
+              color: white;
+  
+          }
+  
+      .bg-image{
+        background-image: url(frieren.jpeg);
+          background-repeat: no-repeat;
+          background-size: cover;
+          filter: blur(5px);
+          height: 100%;
+      }
+  
+      body, html {
+    height: 100%;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  .bg-text {
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
+    color: white;
+    font-weight: bold;
+    border: 3px solid #f1f1f1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 80%;
+    padding: 20px;
+    text-align: center;
+  }
+    </style>
+    
+  </head>
+  <body>
+    <header>
+      <ul class="nav nav-pills nav-fill">
+          <li class="nav-item">
+            <a class="nav-link" href="fcfs.html">FCFS Algorithm</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="sstf.html">SSTF Algorithm</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="roundrobin.html">Round Robin Algorithm</a>
+          </li>
+        </ul>
+  </header>
+    <div class="bg-image"></div>
+    <div class="container bg-text">
+        <h2>Round Robin Scheduler</h2>
+
+        <label for="processCount">Enter the number of processes (2 to 9):</label>
+        <input type="number" id="processCount">
+        
+        <button onclick="getBurstAndArrivalTimes()">Submit</button>
+
+    </div>
+<script>
+   let n, i, qt, count = 0, temp, sq = 0;
+let bt = [], wt = [], tat = [], rem_bt = [], at = [];
+let awt = 0, atat = 0;
+
+function getBurstAndArrivalTimes() {
+    n = parseInt(prompt('Enter the number of processes (2 to 9):'));
+    if (isNaN(n) || n < 2 || n > 9) {
+        alert('Please enter a valid number of processes (2 to 9)');
+        return;
+    }
+
+    console.log('Enter the burst time and arrival time of the processes');
+    for (i = 0; i < n; i++) {
+        at[i] = parseInt(prompt(`P${i + 1} Arrival Time = `));
+        if (isNaN(at[i]) || at[i] < 0) {
+            alert(`Please enter a valid arrival time for P${i + 1}`);
+            return;
+        }
+        bt[i] = parseInt(prompt(`P${i + 1} Burst Time = `));
+        if (isNaN(bt[i]) || bt[i] <= 0) {
+            alert(`Please enter a valid burst time for P${i + 1}`);
+            return;
+        }
+        rem_bt[i] = bt[i];
+    }
+
+    qt = parseInt(prompt('Enter the quantum time:'));
+    if (isNaN(qt) || qt <= 0) {
+        alert('Please enter a valid quantum time (greater than 0)');
+        return;
+    }
+
+    calculateRoundRobin();
+}
+
+function calculateRoundRobin() {
+    let time = 0; // Current time
+    while (true) {
+        let flag = true; // Flag to check if any process is ready to execute
+        for (i = 0; i < n; i++) {
+            if (rem_bt[i] > 0 && at[i] <= time) {
+                flag = false;
+                if (rem_bt[i] > qt) {
+                    time += qt;
+                    rem_bt[i] -= qt;
+                } else {
+                    time += rem_bt[i];
+                    rem_bt[i] = 0;
+                    tat[i] = time - at[i];
+                }
+            }
+        }
+        if (flag) {
+            // No process is ready, find the next arrival time
+            let minArrivalTime = Infinity;
+            for (i = 0; i < n; i++) {
+                if (rem_bt[i] > 0 && at[i] < minArrivalTime) {
+                    minArrivalTime = at[i];
+                }
+            }
+            time = minArrivalTime;
+        }
+        if (areAllProcessesCompleted()) {
+            break;
+        }
+    }
+
+    displayResults();
+}
+
+function areAllProcessesCompleted() {
+    for (i = 0; i < n; i++) {
+        if (rem_bt[i] > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function displayResults() {
+    document.write("<h3>Round Robin Scheduler Results</h3>");
+    document.write("<table border='1'>");
+    document.write("<tr><th>Process</th><th>Arrival Time</th><th>Burst Time</th><th>Turnaround Time</th><th>Waiting Time</th></tr>");
+    for (i = 0; i < n; i++) {
+        wt[i] = tat[i] - bt[i];
+        awt += wt[i];
+        atat += tat[i];
+        document.write(`<tr><td>${i + 1}</td><td>${at[i]}</td><td>${bt[i]}</td><td>${tat[i]}</td><td>${wt[i]}</td></tr>`);
+    }
+    awt /= n;
+    atat /= n;
+    document.write("</table>");
+    document.write(`<p>Average Waiting Time = ${awt}</p>`);
+    document.write(`<p>Average Turnaround Time = ${atat}</p>`);
+}
+
+
+</script>
+
+</body>
+</html>
