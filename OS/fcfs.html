@@ -217,19 +217,18 @@ function average(P, varName) {
     let at, bt;
 
     do {
-      at = parseInt(prompt(`Enter Arrival Time for Process ${i + 1}:`));
-      bt = parseInt(prompt(`Enter Burst Time for Process ${i + 1}:`));
+        at = parseInt(prompt(`Enter Arrival Time for Process ${i + 1}:`));
+        bt = parseInt(prompt(`Enter Burst Time for Process ${i + 1}:`));
 
-      if (!Number.isInteger(at) || at <= 0 || !Number.isInteger(bt) || bt <= 0) {
-        alert("Please enter valid positive integers for Arrival Time and Burst Time.");
-      }
-    } while (!Number.isInteger(at) || at <= 0 || !Number.isInteger(bt) || bt <= 0);
+        if (!Number.isInteger(at) || at < 0 || !Number.isInteger(bt) || bt < 0) {
+            alert("Please enter valid non-negative integers for Arrival Time and Burst Time.");
+        }
+    } while (!Number.isInteger(at) || at < 0 || !Number.isInteger(bt) || bt < 0);
 
     originalProcesses[i].pid = i + 1;
     originalProcesses[i].at = at;
     originalProcesses[i].bt = bt;
-  } 
-
+}
   // Copy the original processes to sort for table display
   const sortedProcesses = [...originalProcesses];
   sortedProcesses.sort((first, second) => first.at - second.at);
