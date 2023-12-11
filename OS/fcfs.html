@@ -228,18 +228,7 @@ function average(P, varName) {
     originalProcesses[i].pid = i + 1;
     originalProcesses[i].at = at;
     originalProcesses[i].bt = bt;
-  }
-  
-
-  // Input processes
-  for (let i = 0; i < processCount; i++) {
-    const at = parseInt(prompt(`Enter Arrival Time for Process ${i + 1}:`));
-    const bt = parseInt(prompt(`Enter Burst Time for Process ${i + 1}:`));
-
-    originalProcesses[i].pid = i + 1;
-    originalProcesses[i].at = at;
-    originalProcesses[i].bt = bt;
-  }
+  } 
 
   // Copy the original processes to sort for table display
   const sortedProcesses = [...originalProcesses];
